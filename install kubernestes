@@ -1,3 +1,6 @@
+master-node 10.0.0.3
+worker-node 10.0.0.4
+
 systemctl disable firewalld; systemctl stop firewalld
 *************
 #Disable swap
@@ -50,5 +53,18 @@ kubeadm token create --print-join-command
 #Verifying the cluster
 #Get Nodes status
 kubectl get nodes
+
+[root@master-node ~]# kubectl get nodes
+NAME          STATUS   ROLES    AGE     VERSION
+master-node   Ready    master   12m     v1.18.5
+worker-node   Ready    <none>   6m47s   v1.18.5
+[root@master-node ~]# kubectl label nodes worker-node kubernetes.io/role=worker
+node/worker-node labeled
+[root@master-node ~]# kubectl get nodes
+NAME          STATUS   ROLES    AGE     VERSION
+master-node   Ready    master   14m     v1.18.5
+worker-node   Ready    worker   9m11s   v1.18.5
+[root@master-node ~]#
+
 #Get component status
 kubectl get cs
