@@ -1,0 +1,489 @@
+https://github.com/kubernetes/kubernetes/issues
+https://www.bluematador.com/learn/kubectl-cheatsheet
+https://phoenixnap.com/kb/how-to-install-kubernetes-on-centos
+
+https://kubernetesbyexample.com/
+https://www.bluematador.com/learn/kubectl-cheatsheet
+
+ClusterIP:if we wish to access the aap container into the pods or pod within the cluster we can access with the help of
+Cluster IP it would be like this : ClusterIP(Service)->Deployment->pods->app container(app container doesn't have an ip)
+
+
+
+NodePort:- if we wish to access the app container publically in that case with will use nodeport it will expose one
+port number, through that port we will access the app container. it will be like this
+NodePort(service)->cluserip(service)->deployment->pod->app container(app container doesn't have an ip)
+
+LoadBalancer:if we wish to access the app container publically but without using any port then we will use loadbalancer.
+when we create the load balancer it create Nodeport and cluserip as well.
+loadbalancer->Nodeport->cluserip->deployment->node->app container(app container doesn't have an ip)
+
+replication controller: used as the autoscaling
+limitation:work for single label set
+plus point: avaiable rolling update here..like if app running on 1.0 it can be update to 1.1
+
+replica set: used as the autoscaling
+limitation:no rolling update avaiable here
+pluse point: used for multiple label set
+
+deployment: used for autoscaling
+plusepoint:both thing avaiable here..multiple label  set,rolling update,
+
+configmaps: it is used to hold the configuration related data in form of key and values , will use to configure application.
+secret: it is used to hold the data but in the form of encrypted and same as key and value to decrypt the value we use
+:-- echo -n "value"| base64 
+type: generic,  docker, registery, tls
+
+Resource quota
+
+Namespaces
+
+Limit Range
+
+Rollout: update the deployment means we are going to update the image into the container suppose we were using nginx images version 1.0 now
+we wish to use nginx version 2.1 so we will use rollout option to update. the rollout only get trigger when we make changes into
+the node specification not the number of node.
+
+minReadySecond: give the number in second, in this time being the pod will get ready
+replica: it means, these number of number should alway be running suppose we have 10 node in the deployement so at the time of rollout, new number of 
+node we create depends on maxsurge. suppose maxsurge is 2 so new 2 pod will create. and maxunavailable number of node will udpate and move to the new 
+replica set.
+
+maxsurge: these number of nodes will create to achive the replica must be running point..check the description in replica
+
+maxunavailable: at the time of rolling update, one more replica set get created so what exactly happen there.
+the number when we give here in the maxunavaiable that number of node get update and move into the new replica set
+at a time, then next same number of node will pick and update and move to new replica set.
+
+recreate : it same as rolling update but there is no number of replica should be avaiable during the update. it just create the new repica set
+and udpate all the avaiable nodes and move to the new replica set.
+
+resource request: tell the secheduler to assing wokernode which has limit number of ram or cpu or disk space.
+resource:
+  request:
+    memory: 200Mi/200M/200Ti/200Gi
+    cpu: 500m# 500 mili cpu
+Limit: resource should not use more the mentioned limit range.
+
+resource:
+  request:
+    memory: 200Mi/200M/200Ti/200Gi
+    cpu: 500m# 500 mili cpu
+  limits:
+    memory: 200Mi
+
+Namespace : it is same as we are create vitual machine on vmware, by default the new created node should use more then specific limited ram/cpu,
+when ever we create the resource it created in the default namespace by default. how do we check where the resource support the namespace or not
+it will check via this command kubectl api-resource|less .. in the name section you find true or false.
+
+kubectl create <ns or namespace> <namespace name>
+kubect apply pod.yml --namespace test
+kubectl get pods -n test # which pods are running into the test namespace
+kubectl get pods --all-namespace # see the all the namespace with pod details.
+kubectl delete pode pod4 -n test # delete the pod in the test namespace.
+metadata:
+  namespace: test
+kube-node-lease : worker nodes send heart beat to the master node to let them know that i am live. those uses this namespace.
+kube-public: only those node which not require any kind of authentication that lies in this namespace.
+kube-system: all the system management realated like scheduler,etcd,api-server,controll all lies under this namespace.   
+kubectl config set-context  --current --namespace=test # make test default namespace
+servicename.namespacename.sve.cluster.local # to access the pod from one namespace to another.
+# set the number of resource can be created within the namespace, if someone try to create more give error.
+spec:
+   hard:
+     pods: 2
+
+
+kubeadm join 192.168.2.107:6443 --token t7xxbt.64dednl9egp09h86 --discovery-token-ca-cert-hash sha256:6a8783ec5190e3158eed128b5c5e3734544b502ce7430ccff96f1ec68c25f4df
+https://labs.play-with-k8s.com/
+
+Kubernetes Cheat Sheet
+A cheat sheet for Kubernetes commands.
+
+https://github.com/justmeandopensource/kubernetes/tree/master/docs
+
+important one
+https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#create # all the command of the kubernetes
+
+Kubectl Alias
+Linux
+
+alias k=kubectl
+Windows
+
+Set-Alias -Name k -Value kubectl
+Cluster Info
+Get clusters
+kubectl config get-clusters
+NAME
+docker-for-desktop-cluster
+foo
+Get cluster info.
+kubectl cluster-info
+Kubernetes master is running at https://172.17.0.58:8443
+Contexts
+A context is a cluster, namespace and user.
+
+Get a list of contexts.
+kubectl config get-contexts
+CURRENT   NAME                 CLUSTER                      AUTHINFO             NAMESPACE
+          docker-desktop       docker-desktop               docker-desktop
+*         foo                  foo                          foo                  bar
+Get the current context.
+kubectl config current-context
+foo
+Switch current context.
+kubectl config use-context docker-desktop
+Set default namesapce
+kubectl config set-context $(kubectl config current-context) --namespace=my-namespace
+To switch between contexts, you can also install and use kubectx.
+
+Get Commands
+kubectl get all
+kubectl get namespaces
+kubectl get configmaps
+kubectl get nodes
+kubectl get pods
+kubectl get rs
+kubectl get svc kuard
+kubectl get endpoints kuard
+Additional switches that can be added to the above commands:
+
+-o wide - Show more information.
+--watch or -w - watch for changes.
+Namespaces
+--namespace - Get a resource for a specific namespace.
+You can set the default namespace for the current context like so:
+
+kubectl config set-context $(kubectl config current-context) --namespace=my-namespace
+To switch namespaces, you can also install and use kubens.
+
+Labels
+Get pods showing labels.
+kubectl get pods --show-labels
+Get pods by label.
+kubectl get pods -l environment=production,tier!=frontend
+kubectl get pods -l 'environment in (production,test),tier notin (frontend,backend)'
+Describe Command
+kubectl describe nodes [id]
+kubectl describe pods [id]
+kubectl describe rs [id]
+kubectl describe svc kuard [id]
+kubectl describe endpoints kuard [id]
+Delete Command
+kubectl delete nodes [id]
+kubectl delete pods [id]
+kubectl delete rs [id]
+kubectl delete svc kuard [id]
+kubectl delete endpoints kuard [id]
+Force a deletion of a pod without waiting for it to gracefully shut down
+
+kubectl delete pod-name --grace-period=0 --force
+Create vs Apply
+kubectl create can be used to create new resources while kubectl apply inserts or updates resources while maintaining any manual changes made like scaling pods.
+
+--record - Add the current command as an annotation to the resource.
+--recursive - Recursively look for yaml in the specified directory.
+Create Pod
+kubectl run kuard --generator=run-pod/v1 --image=gcr.io/kuar-demo/kuard-amd64:1 same
+kubectl apply -f kuard-pod.yml
+Create Deployment
+kubectl run kuard --image=gcr.io/kuar-demo/kuard-amd64:1 --output yaml --export --dry-run > kuard-deployment.yml
+kubectl apply -f kuard-deployment.yml
+Create Service
+kubectl expose deployment kuard --port 8080 --target-port=8080 --output yaml --export --dry-run > kuard-service.yml
+kubectl apply -f kuard-service.yml
+Export YAML for New Pod
+kubectl run my-cool-app —-image=me/my-cool-app:v1 --output yaml --export --dry-run > my-cool-app.yaml
+Export YAML for Existing Object
+kubectl get deployment my-cool-app --output yaml --export > my-cool-app.yaml
+Logs
+Get logs.
+kubectl logs -l app=kuard
+Get logs for previously terminated container.
+kubectl logs POD_NAME --previous
+Watch logs in real time.
+kubectl attach POD_NAME
+Copy files out of pod (Requires tar binary in container).
+kubectl cp POD_NAME:/var/log .
+You can also install and use kail.
+
+Port Forward
+kubectl port-forward deployment/kuard 8080:8080
+Scaling
+Update replicas.
+kubectl scale deployment nginx-deployment --replicas=10
+Autoscaling
+Set autoscaling config.
+kubectl autoscale deployment nginx-deployment --min=10 --max=15 --cpu-percent=80
+Rollout
+Get rollout status.
+kubectl rollout status deployment/nginx-deployment
+Waiting for rollout to finish: 2 out of 3 new replicas have been updated...
+deployment "nginx-deployment" successfully rolled out
+Get rollout history.
+kubectl rollout history deployment/nginx-deployment
+kubectl rollout history deployment/nginx-deployment --revision=2
+Undo a rollout.
+kubectl rollout undo deployment/nginx-deployment
+kubectl rollout undo deployment/nginx-deployment --to-revision=2
+Pause/resume a rollout
+kubectl rollout pause deployment/nginx-deployment
+kubectl rollout resume deploy/nginx-deployment
+Pod Example
+**********
+apiVersion: v1
+kind: Pod
+metadata:
+  name: cuda-test
+spec:
+  containers:
+    - name: cuda-test
+      image: "k8s.gcr.io/cuda-vector-add:v0.1"
+      resources:
+        limits:
+          nvidia.com/gpu: 1
+  nodeSelector:
+    accelerator: nvidia-tesla-p100
+Deployment Example
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  namespace: my-namespace
+  labels:
+    - environment: production,
+    - teir: frontend
+  annotations:
+    - key1: value1,
+    - key2: value2
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.7.9
+        ports:
+        - containerPort: 80
+Dashboard
+Enable proxy
+kubectl proxy
+Azure Kubernetes Service
+List of az aks commands
+
+Get Credentials
+az aks get-credentials --resource-group <Resource Group Name> --name <AKS Name>
+Show Dashboard
+Secure the dashboard like this. Then run:
+
+az aks browse --resource-group <Resource Group Name> --name <AKS Name>
+Upgrade
+Get updates
+
+az aks get-upgrades --resource-group <Resource Group Name> --name <AKS Name>	
+
+************************
+apiVersion: v1
+kind: Pod
+metadata:
+  name: myfirstpod # pod name
+  labels:
+    env: prod
+spec:
+  containers:
+    - name: containername # container name
+      images: nginx
+	  
+  
+**********************
+
+
+Types of Services
+
+ClusterIP − This helps in restricting the service within the cluster. It exposes the service within the defined Kubernetes cluster.
+
+spec:
+   type: NodePort
+   ports:
+   - port: 8080
+      nodePort: 31999
+      name: NodeportService
+NodePort − It will expose the service on a static port on the deployed node. A ClusterIP service, to which NodePort service will route, is automatically created. The service can be accessed from outside the cluster using the NodeIP:nodePort.
+
+spec:
+   ports:
+   - port: 8080
+      nodePort: 31999
+      name: NodeportService
+      clusterIP: 10.20.30.40
+Load Balancer − It uses cloud providers’ load balancer. NodePort and ClusterIP services are created automatically to which the external load balancer will route.
+
+A full service yaml file with service type as Node Port. Try to create one yourself.
+
+apiVersion: v1
+kind: Service
+metadata:
+   name: appname
+   labels:
+      k8s-app: appname
+spec:
+   type: NodePort
+   ports:
+   - port: 8080
+      nodePort: 31999
+      name: omninginx
+   selector:
+      k8s-app: appname
+      component: nginx
+      env: env_name
+***********************************
+
+apiVersion: v1
+kind: ReplicationController --------------------------> 1
+metadata:
+   name: Tomcat-ReplicationController --------------------------> 2
+spec:
+   replicas: 3 ------------------------> 3
+   template:
+      metadata:
+         name: Tomcat-ReplicationController
+      labels:
+         app: App
+         component: neo4j
+      spec:
+         containers:
+         - name: Tomcat- -----------------------> 4
+         image: tomcat: 8.0
+         ports:
+            - containerPort: 7474 ------------------------> 5
+Setup Details
+Kind: ReplicationController → In the above code, we have defined the kind as replication controller which tells the kubectl that the yaml file is going to be used for creating the replication controller.
+
+name: Tomcat-ReplicationController → This helps in identifying the name with which the replication controller will be created. If we run the kubctl, get rc < Tomcat-ReplicationController > it will show the replication controller details.
+
+replicas: 3 → This helps the replication controller to understand that it needs to maintain three replicas of a pod at any point of time in the pod lifecycle.
+
+name: Tomcat → In the spec section, we have defined the name as tomcat which will tell the replication controller that the container present inside the pods is tomcat.
+
+containerPort: 7474 → It helps in making sure that all the nodes in the cluster where the pod is running the container inside the pod will be exposed on the same port 7474.
+
+apiVersion: extensions/v1beta1 --------------------->1
+kind: ReplicaSet --------------------------> 2
+metadata:
+   name: Tomcat-ReplicaSet
+spec:
+   replicas: 3
+   selector:
+      matchLables:
+         tier: Backend ------------------> 3
+      matchExpression:
+{ key: tier, operation: In, values: [Backend]} --------------> 4
+template:
+   metadata:
+      lables:
+         app: Tomcat-ReplicaSet
+         tier: Backend
+      labels:
+         app: App
+         component: neo4j
+   spec:
+      containers:
+      - name: Tomcat
+      image: tomcat: 8.0
+      ports:
+      - containerPort: 7474
+Setup Details
+apiVersion: extensions/v1beta1 → In the above code, the API version is the advanced beta version of Kubernetes which supports the concept of replica set.
+
+kind: ReplicaSet → We have defined the kind as the replica set which helps kubectl to understand that the file is used to create a replica set.
+
+tier: Backend → We have defined the label tier as backend which creates a matching selector.
+
+{key: tier, operation: In, values: [Backend]} → This will help matchExpression to understand the matching condition we have defined and in the operation which is used by matchlabel to find details.
+
+Run the above file using kubectl and create the backend replica set with the provided definition in the yaml file.
+
+
+apiVersion: extensions/v1beta1 --------------------->1
+kind: Deployment --------------------------> 2
+metadata:
+   name: Tomcat-ReplicaSet
+spec:
+   replicas: 3
+   template:
+      metadata:
+         lables:
+            app: Tomcat-ReplicaSet
+            tier: Backend
+   spec:
+      containers:
+         - name: Tomcatimage:
+            tomcat: 8.0
+            ports:
+               - containerPort: 7474
+In the above code, the only thing which is different from the replica set is we have defined the kind as deployment.
+
+Create Deployment
+$ kubectl create –f Deployment.yaml -–record
+deployment "Deployment" created Successfully.
+Fetch the Deployment
+$ kubectl get deployments
+NAME           DESIRED     CURRENT     UP-TO-DATE     AVILABLE    AGE
+Deployment        3           3           3              3        20s
+Check the Status of Deployment
+$ kubectl rollout status deployment/Deployment
+Updating the Deployment
+$ kubectl set image deployment/Deployment tomcat=tomcat:6.0
+Rolling Back to Previous Deployment
+$ kubectl rollout undo deployment/Deployment –to-revision=2
+
+
+kubectl annotate - Update the annotations on a resource
+kubectl api-resources - Print the supported API resources on the server
+kubectl api-versions - Print the supported API versions on the server, in the form of "group/version"
+kubectl apply - Apply a configuration to a resource by filename or stdin
+kubectl attach - Attach to a running container
+kubectl auth - Inspect authorization
+kubectl autoscale - Auto-scale a Deployment, ReplicaSet, or ReplicationController
+kubectl certificate - Modify certificate resources.
+kubectl cluster-info - Display cluster info
+kubectl completion - Output shell completion code for the specified shell (bash or zsh)
+kubectl config - Modify kubeconfig files
+kubectl cordon - Mark node as unschedulable
+kubectl cp - Copy files and directories to and from containers.
+kubectl create - Create a resource from a file or from stdin.
+kubectl debug - Create debugging sessions for troubleshooting workloads and nodes
+kubectl delete - Delete resources by filenames, stdin, resources and names, or by resources and label selector
+kubectl describe - Show details of a specific resource or group of resources
+kubectl diff - Diff live version against would-be applied version
+kubectl drain - Drain node in preparation for maintenance
+kubectl edit - Edit a resource on the server
+kubectl exec - Execute a command in a container
+kubectl explain - Documentation of resources
+kubectl expose - Take a replication controller, service, deployment or pod and expose it as a new Kubernetes Service
+kubectl get - Display one or many resources
+kubectl kustomize - Build a kustomization target from a directory or a remote url.
+kubectl label - Update the labels on a resource
+kubectl logs - Print the logs for a container in a pod
+kubectl options - Print the list of flags inherited by all commands
+kubectl patch - Update field(s) of a resource
+kubectl plugin - Provides utilities for interacting with plugins.
+kubectl port-forward - Forward one or more local ports to a pod
+kubectl proxy - Run a proxy to the Kubernetes API server
+kubectl replace - Replace a resource by filename or stdin
+kubectl rollout - Manage the rollout of a resource
+kubectl run - Run a particular image on the cluster
+kubectl scale - Set a new size for a Deployment, ReplicaSet or Replication Controller
+kubectl set - Set specific features on objects
+kubectl taint - Update the taints on one or more nodes
+kubectl top - Display Resource (CPU/Memory/Storage) usage.
+kubectl uncordon - Mark node as schedulable
+kubectl version - Print the client and server version information
+kubectl wait - Experimental: Wait for a specific condition on one or many resources
